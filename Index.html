@@ -1,0 +1,477 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Productpagina – Volkoren brood (chips + tap-hold)</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" crossorigin="anonymous" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.13.1/font/bootstrap-icons.min.css" />
+  <style>
+    .rating .star { cursor: pointer; }
+    #scoreButton { transition: background-color .2s ease, border-color .2s ease, color .2s ease; }
+
+    /* Chips (badges) basis */
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: .375rem;
+      line-height: 1;
+      padding: .35rem .55rem;
+      border-radius: 9999px; /* pill */
+      border: 1px solid var(--bs-border-color, #dee2e6);
+      background-color: var(--bs-body-bg);
+      color: var(--bs-body-color);
+      font-size: .875rem;
+      white-space: nowrap;
+      user-select: none;
+    }
+    .chip + .chip { margin-left: .375rem; }
+    .chips-wrap { display: flex; flex-wrap: wrap; gap: .5rem .375rem; }
+
+    /* Subtle percentage tag binnen de chip */
+    .chip .pct {
+      font-size: .75rem;
+      color: var(--bs-secondary-color);
+    }
+
+    /* Kleurcodes conform labeling (consistent) */
+    .chip-basic       { border-color: var(--bs-secondary-bg); }
+    .chip-culinair    { border-color: #ff9933; background-color: rgba(255,153,51,.06); }
+    .chip-industrieel { border-color: var(--bs-danger); background-color: rgba(220,53,69,.06); }
+
+    /* Tekstkleur consistent */
+    .text-culinair    { color: #ff9933 !important; }
+    .text-industrieel { color: var(--bs-danger) !important; }
+
+    /* Hint-icoontje voor extra info */
+    .chip .info-dot {
+      width: .55rem; height: .55rem;
+      border-radius: 50%;
+      background: currentColor;
+      display: inline-block;
+      opacity: .8;
+    }
+
+    /* Focus states voor toegankelijkheid */
+    .chip:focus-visible {
+      outline: 2px solid var(--bs-primary);
+      outline-offset: 2px;
+    }
+        .chip-basic {
+      border: none !important;
+      background: transparent !important;
+      padding: 0 !important;
+      font-size: .9rem;
+      color: var(--bs-body-color) !important;
+      cursor: default !important;
+    }
+    /* — Banner compacter — */
+    .product-banner { row-gap:.25rem !important; }
+    .product-banner h5 { font-size:.95rem; margin-bottom:.125rem; }
+    .product-banner .thumb { width:2.5rem; height:1.25rem !important; }      /* halve hoogte */
+    .product-banner #scoreBlock { width:2.5rem; height:1.25rem !important; }  /* halve hoogte */
+    .product-banner #scoreBlock span { font-size:.75rem; line-height:1; }
+
+    /* — Minder ruimte tussen banner/alert en eerste kaart — */
+    .container .alert { margin-top:.5rem !important; margin-bottom:.5rem !important; }
+
+    /* — Chips consistent uitgelijnd — */
+    .chip{
+      display:inline-flex; align-items:center; gap:.375rem;
+      padding:.40rem .60rem; line-height:1; border-radius:9999px;
+      font-size:.875rem; vertical-align:middle;
+    }
+    .chip .pct{ font-size:.75rem; color:var(--bs-secondary-color); }
+
+    /* Basisingrediënten: niet klikbaar + geen omlijning/tooltip look */
+    .chip-basic{
+      border:0 !important; background-color:var(--bs-secondary-bg) !important;
+      cursor:default; box-shadow:none;
+    }
+    .chip-basic:focus,.chip-basic:hover{ box-shadow:none; }
+
+    /* Culinair/Industrieel behouden subtiele border */
+    .chip-culinair{ border:1px solid #ff9933; background-color:rgba(255,153,51,.06); }
+    .chip-industrieel{ border:1px solid var(--bs-danger); background-color:rgba(220,53,69,.06); }
+
+    /* Alert 2× zo laag */
+.alert.alert-primary {
+      padding: .35rem .75rem !important;
+      font-size: .85rem !important;
+      line-height: 1.2 !important;
+    }
+
+    /* Icoontje ook kleiner */
+    .alert.alert-primary svg {
+      width: 18px !important;
+      height: 18px !important;
+      margin-right: .5rem !important;
+    }
+
+    /* Minder ruimte onder de alert */
+    .alert.alert-primary {
+      margin-bottom: .5rem !important;
+    }
+
+
+  </style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <div class="container-fluid">
+      <a class="navbar-brand" href="#">Gezonde<span class="text-primary">Blik</span></a>
+      <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+      </button>
+      <div class="collapse navbar-collapse" id="navbarSupportedContent">
+        <form class="d-flex ms-auto" role="search">
+          <div class="input-group">
+            <span class="input-group-text bg-white border-end-0"><i class="fas fa-search"></i></span>
+            <input class="form-control border-start-0" type="search" placeholder="Zoek product…" aria-label="Zoeken" />
+          </div>
+        </form>
+      </div>
+    </div>
+  </nav>
+
+  <div class="container my-4">
+
+    <!-- Banner -->
+    <div class="row g-1 align-items-center">
+      <!-- Product afbeelding / placeholder -->
+      <div class="col-3 col-lg-5">
+        <div class="d-flex justify-content-center align-items-center bg-light rounded flex-shrink-0" style="width: 1.25rem; height: 1.25rem;">
+          <i class="bi bi-image text-muted" style="font-size: 0.8rem;"></i>
+        </div>
+      </div>
+      <!-- Productnaam, tags en score -->
+      <div class="col-9 col-lg-7">
+        <div class="d-flex justify-content-between align-items-start mb-1">
+          <div class="pe-2">
+            <!-- Producttitel: gebruik fs-6 voor een prettige grootte op kleine schermen -->
+            <h5 class="mb-1 fw-semibold fs-6">
+              <i id="favorietenKnop" class="bi bi-patch-check" style="cursor:pointer;"></i>
+              AH Extra lang lekker volkoren
+            </h5>
+            <!-- Tags -->
+            <div class="d-flex flex-wrap">
+              <span class="badge bg-secondary me-1 p-1 small">Brood</span>
+              <span class="badge bg-secondary p-1 small">Volkoren brood</span>
+            </div>
+          </div>
+          <!-- Scoreblokje -->
+          <div id="scoreBlock" class="d-flex align-items-center justify-content-center bg-primary text-white rounded flex-shrink-0" style="width: 2.5rem; height: 1.25rem;">
+            <span id="scoreNumber" data-score="3"></span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Alert -->
+    <div class="row g-0">
+      <div class="col-12 mt-0.5">
+        <div class="alert alert-primary d-flex align-items-center mt-1 mb-1 p-1" role="alert" style="background-color: rgba(13,110,253,0.5); font-size: .9rem;">
+          <svg xmlns="http://www.w3.org/2000/svg" class="bi flex-shrink-0 me-2" width="24" height="24" viewBox="0 0 16 16" role="img" aria-label="Waarschuwing:">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+          </svg>
+          <div class="text-white">
+            Er hebben wijzigingen plaatsgevonden bij dit product
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Content sections: Ingrediënten, Voedingswaarden, Klassiek recept en Alternatieven -->
+    <div class="row g-4 mt-0.5">
+      <!-- Ingrediënten -->
+      <div class="col-12 col-md-6">
+        <div class="card h-100">
+          <div class="card-header bg-primary-subtle d-flex justify-content-between align-items-center">
+            <span>Ingrediënten</span>
+          </div>
+          <div class="card-body">
+            <div class="chips-wrap" id="chipsIngredients">
+              <!-- BASIS -->
+                <span class="chip chip-basic" aria-label="Volkorenmeel 60%">
+                  <span>Volkorenmeel</span><span class="pct">· 60%</span>
+                </span>
+                <span class="chip chip-basic" aria-label="Water 30%">
+                  <span>Water</span><span class="pct">· 30%</span>
+                </span>
+                <span class="chip chip-basic" aria-label="Gist 2%">
+                  <span>Gist</span><span class="pct">· 2%</span>
+                </span>
+                <span class="chip chip-basic" aria-label="Zout 1.2%">
+                  <span>Zout</span><span class="pct">· 1.2%</span>
+                </span>
+
+              <!-- CULINAIR -->
+              <button type="button" class="chip chip-culinair text-culinair"
+                data-bs-toggle="popover"
+                data-bs-placement="bottom"
+                data-bs-html="true"
+                data-bs-title="Suiker – Culinair"
+                data-bs-content="<div class='small'><div class='mb-1'><strong>Wat is het?</strong> Suiker (sacharose).</div><div><strong>Waarvoor dient het?</strong> Zoetkracht, kleuring (Maillard), gistactiviteit sturen.</div></div>"
+                aria-label="Suiker 1% – info">
+                <span>Suiker</span><span class="pct">· 1%</span>
+              </button>
+              <!-- INDUSTRIEEL -->
+              <button type="button" class="chip chip-industrieel text-industrieel"
+                data-bs-toggle="popover"
+                data-bs-placement="bottom"
+                data-bs-html="true"
+                data-bs-title="Tarwegluten – Industrieel"
+                data-bs-content="<div class='small'><div class='mb-1'><strong>Wat is het?</strong> Geconcentreerde glutenfractie.</div><div><strong>Waarvoor dient het?</strong> Versterkt structuur/rekbaarheid van het deeg.</div></div>"
+                aria-label="Tarwegluten 3% – info">
+                <span>Tarwegluten</span><span class="pct">· 3%</span>
+              </button>
+              <button type="button" class="chip chip-industrieel text-industrieel"
+                data-bs-toggle="popover"
+                data-bs-placement="bottom"
+                data-bs-html="true"
+                data-bs-title="Gedroogd zuurdesem – Industrieel"
+                data-bs-content="<div class='small'><div class='mb-1'><strong>Wat is het?</strong> Gevriesdroogd/gedroogd zuurdesem.</div><div><strong>Waarvoor dient het?</strong> Zuurtegraad en smaak sturen, procesbeheersing.</div></div>"
+                aria-label="Gedroogd zuurdesem 0.3% – info">
+                <span>Gedroogd zuurdesem</span><span class="pct">· 0.3%</span>
+              </button>
+              <button type="button" class="chip chip-industrieel text-industrieel"
+                data-bs-toggle="popover"
+                data-bs-placement="bottom"
+                data-bs-html="true"
+                data-bs-title="Ascorbinezuur – Industrieel"
+                data-bs-content="<div class='small'><div class='mb-1'><strong>Wat is het?</strong> Vitamine C (E300).</div><div><strong>Waarvoor dient het?</strong> Antioxidant/deegversteviger, betere volume/crumb.</div></div>"
+                aria-label="Ascorbinezuur 0.2% – info">
+                <span>Ascorbinezuur</span><span class="pct">· 0.2%</span>
+              </button>
+              <button type="button" class="chip chip-industrieel text-industrieel"
+                data-bs-toggle="popover"
+                data-bs-placement="bottom"
+                data-bs-html="true"
+                data-bs-title="Enzymen – Industrieel"
+                data-bs-content="<div class='small'><div class='mb-1'><strong>Wat is het?</strong> Enzympreparaten (bakkersenzymen).</div><div><strong>Waarvoor dient het?</strong> Verwerkbaarheid/consistentie, krumeigenschappen.</div></div>"
+                aria-label="Enzymen 0.3% – info">
+                <span>Enzymen</span><span class="pct">· 0.3%</span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Voedingswaarden -->
+      <div class="col-12 col-md-6">
+        <div class="card h-100">
+          <div class="card-header bg-primary-subtle">Voedingswaarden (per 100 g)</div>
+          <div class="card-body p-0">
+            <table class="table table-sm table-bordered mb-0">
+              <tbody>
+                <tr><th class="w-50">Energie</th><td>233 kcal</td></tr>
+                <tr><th>Vet</th><td>2,1 g</td></tr>
+                <tr><th>Verzadigd vet</th><td>0,4 g</td></tr>
+                <tr><th>Koolhydraten</th><td>39,3 g</td></tr>
+                <tr><th>Suikers</th><td>1,9 g</td></tr>
+                <tr><th>Vezels</th><td>6,6 g</td></tr>
+                <tr><th>Eiwitten</th><td>10,9 g</td></tr>
+                <tr><th>Zout</th><td>0,98 g</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="card-footer"><small class="text-muted">Bron: NEVO 2023/8.0 – Brood.net</small></div>
+        </div>
+      </div>
+      <!-- Klassiek recept -->
+      <div class="col-12 col-md-6">
+        <div class="card h-100" id="origReceptCard">
+          <div class="card-header bg-primary-subtle d-flex justify-content-between align-items-center">
+            <span>Klassiek recept</span>
+          </div>
+          <ul class="nav nav-tabs px-3 pt-2" role="tablist">
+            <li class="nav-item" role="presentation">
+              <button class="nav-link active" id="tab-ingred-orig" data-bs-toggle="tab" data-bs-target="#pane-ingred-orig" type="button" role="tab" aria-controls="pane-ingred-orig" aria-selected="true">Ingrediënten</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-bereiding-orig" data-bs-toggle="tab" data-bs-target="#pane-bereiding-orig" type="button" role="tab" aria-controls="pane-bereiding-orig" aria-selected="false">Bereiding</button>
+            </li>
+            <li class="nav-item" role="presentation">
+              <button class="nav-link" id="tab-etiket-orig" data-bs-toggle="tab" data-bs-target="#pane-etiket-orig" type="button" role="tab" aria-controls="pane-etiket-orig" aria-selected="false">Info</button>
+            </li>
+          </ul>
+          <div class="tab-content p-3">
+            <div class="tab-pane fade show active" id="pane-ingred-orig" role="tabpanel">
+              <p class="small mb-2 text-muted">Een traditioneel volkorenbrood bestaat uit:</p>
+              <ul class="list-group">
+                <li class="list-group-item">Volkorenmeel</li>
+                <li class="list-group-item">Water</li>
+                <li class="list-group-item">Gist of desem</li>
+                <li class="list-group-item">Zout</li>
+              </ul>
+            </div>
+            <div class="tab-pane fade" id="pane-bereiding-orig" role="tabpanel" aria-labelledby="tab-bereiding-orig">
+              <div class="row g-3 align-items-start">
+                <div class="col-12 col-lg-6">
+                  <label for="origServingsInput" class="form-label small mb-1">Aantal broden</label>
+                  <div class="input-group input-group-sm" style="max-width: 220px;">
+                    <button class="btn btn-outline-secondary" type="button" id="origServingsMinus" aria-label="Verlaag aantal">−</button>
+                    <input type="number" class="form-control text-center" id="origServingsInput" value="1" min="1" step="1" aria-label="Aantal broden" />
+                    <button class="btn btn-outline-secondary" type="button" id="origServingsPlus" aria-label="Verhoog aantal">+</button>
+                  </div>
+                  <div class="form-text mb-3">Richtlijn: 1 brood ≈ 800 gram</div>
+                  <p class="small text-muted">Benodigdheden:</p>
+                  <ul class="list-group list-group-flush mb-3">
+                    <li class="list-group-item d-flex justify-content-between"><span>Volkorenmeel</span><strong><span class="orig-qty-mirror" data-src-index="0">500</span> g</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Water</span><strong><span class="orig-qty-mirror" data-src-index="1">325</span> ml</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Gist</span><strong><span class="orig-qty-mirror" data-src-index="2">7</span> g</strong></li>
+                    <li class="list-group-item d-flex justify-content-between"><span>Zout</span><strong><span class="orig-qty-mirror" data-src-index="3">8</span> g</strong></li>
+                  </ul>
+                </div>
+                <div class="col-12 col-lg-6">
+                  <label class="form-label small mb-1">Bereidingswijze</label>
+                  <ol class="small mb-0">
+                    <li>Meng de droge ingrediënten in een kom</li>
+                    <li>Voeg water toe en kneed tot een soepel deeg (8–10 min)</li>
+                    <li>Laat rijzen (60–90 min), vorm een brood</li>
+                    <li>Laat narijzen (45–60 min) en bak 35–40 min op 220°C</li>
+                    <li>Laat volledig afkoelen</li>
+                  </ol>
+                </div>
+              </div>
+            </div>
+            <div class="tab-pane fade" id="pane-etiket-orig" role="tabpanel">
+              <ul class="list-unstyled small mb-0">
+                <li><strong>Basis:</strong> meel, water, rijsmiddel, zout</li>
+                <li><strong>Doel:</strong> zo puur mogelijk recept</li>
+                <li>Vergelijk dit tabblad met het product-ingrediëntenblok</li>
+              </ul>
+            </div>
+          </div>
+          <div class="card-footer">
+            <small class="text-muted">Bron: traditioneel basisrecept</small>
+          </div>
+        </div>
+      </div>
+      <!-- Alternatieven -->
+      <div class="col-12 col-md-6">
+        <div class="card h-100">
+          <div class="card-header bg-primary-subtle">
+            <span>Alternatieven</span>
+          </div>
+          <div class="card-body">
+            <div class="row g-3">
+              <div class="col-12 col-sm-6">
+                <div class="card h-100">
+                  <img src="placeholder_light_gray_block.png" class="card-img-top" alt="Alternatief in dezelfde winkel">
+                  <div class="card-body d-flex flex-column p-2">
+                    <h6 class="card-title mb-2">Beste GezondeBlik score bij dezelfde winkel</h6>
+                    <a href="#" class="btn btn-primary mt-auto btn-sm">Bekijk product</a>
+                  </div>
+                </div>
+              </div>
+              <div class="col-12 col-sm-6">
+                <div class="card h-100">
+                  <img src="placeholder_light_gray_block.png" class="card-img-top" alt="Alternatief binnen productgroep">
+                  <div class="card-body d-flex flex-column p-2">
+                    <h6 class="card-title mb-2">Beste GezondeBlik score binnen productgroep</h6>
+                    <a href="#" class="btn btn-primary mt-auto btn-sm">Bekijk product</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <script>
+    // Favorieten toggle (voorbeeld)
+    document.addEventListener('DOMContentLoaded', function(){
+      const knop = document.getElementById('favorietenKnop');
+      knop?.addEventListener('click', function(){
+        if (knop.classList.contains('bi-patch-check')) {
+          knop.classList.remove('bi-patch-check');
+          knop.classList.add('bi-patch-check-fill');
+        } else {
+          knop.classList.remove('bi-patch-check-fill');
+          knop.classList.add('bi-patch-check');
+        }
+      });
+    });
+
+    // Score berekenen en weergeven in het scoreblokje
+    (function(){
+      const extrasCount = document.querySelectorAll('#chipsIngredients .chip-culinair, #chipsIngredients .chip-industrieel').length;
+      const scoreMap = [5,4,3,2,1,1,1];
+      const computed = scoreMap[Math.min(extrasCount, scoreMap.length-1)];
+      const scoreNum = document.getElementById('scoreNumber');
+      if (scoreNum) {
+        const ds = Number(scoreNum.dataset.score);
+        const finalScore = (!Number.isNaN(ds) && ds > 0) ? ds : computed;
+        scoreNum.textContent = `${finalScore}/5`;
+      }
+    })();
+
+    // Chips: popovers + tap-hold (lange tik) voor niet-basisingrediënten
+    document.addEventListener('DOMContentLoaded', function(){
+      const popoverTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="popover"]'));
+      const popovers = popoverTriggerList.map(el => new bootstrap.Popover(el, { trigger: 'manual' }));
+
+      // Helper: open/close popover voor 1 element
+      function togglePopover(el, show=true) {
+        const i = popoverTriggerList.indexOf(el);
+        if (i === -1) return;
+        // sluit eerst alle andere
+        popovers.forEach(p => p.hide());
+        show ? popovers[i].show() : popovers[i].hide();
+      }
+
+      // Klik opent/sluit (snelle actie); tap-hold opent ook
+      popoverTriggerList.forEach(el => {
+        // Click
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          // als hij al zichtbaar is: sluit hem, anders open
+          const i = popoverTriggerList.indexOf(el);
+          if (i === -1) return;
+          const tip = popovers[i];
+          // rudimentaire check of zichtbaar (via aria-describedby)
+          const open = el.getAttribute('aria-describedby');
+          togglePopover(el, !open);
+        });
+
+        // Tap-hold (lange tik ~500ms)
+        let holdTimer = null;
+        const start = () => {
+          if (holdTimer) clearTimeout(holdTimer);
+          holdTimer = setTimeout(() => togglePopover(el, true), 500);
+        };
+        const clear = () => { if (holdTimer) clearTimeout(holdTimer); };
+
+        el.addEventListener('touchstart', start, {passive: true});
+        el.addEventListener('touchend', clear, {passive: true});
+        el.addEventListener('touchmove', clear, {passive: true});
+        // Ook mouse long-press voor desktop
+        el.addEventListener('mousedown', start);
+        el.addEventListener('mouseup', clear);
+        el.addEventListener('mouseleave', clear);
+      });
+
+      // Sluit popover bij klik buiten
+      document.addEventListener('click', (evt)=>{
+        const openTip = document.querySelector('.popover.show');
+        if (!openTip) return;
+        const isInside = evt.target.closest('.popover, [data-bs-toggle="popover"]');
+        if (!isInside) {
+          popovers.forEach(p => p.hide());
+        }
+      });
+    });
+
+    // TODO: Instellingen-toggle (later toevoegen):
+    // In een instellingenpaneel een switch aanbieden “Kleuren tonen voor bewerkingstype”.
+    // - Bij UIT: alle chips krijgen dezelfde neutrale stijl (chip-basic) en pct blijft zichtbaar.
+    // - Bij AAN: chips gebruiken chip-culinair/chip-industrieel met bijbehorende kleuren.
+    // Bewaar voorkeur in localStorage en pas toe op elke pagina-load.
+
+  </script>
+</body>
+</html>
